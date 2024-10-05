@@ -27,8 +27,10 @@
         <label for="dateshown">Select a Date: </label>
         <input type="date" id="dateshown" name="dateshown" required>
         <button type="submit">Search</button>
+        <button id="fetchReport">Fetch Attendance Report</button>
     </form>
 
+    
     <form id="StudentAttendanceForm" class="student-form">
         <h4>Mark Attendance</h4>
         <div id="studentList">
@@ -90,18 +92,25 @@
                 } else {
                     // Iterate over the attendance data and create table rows for each entry
                     attendanceData.forEach(entry => {
-                        const row = document.createElement('tr');
-    
-                        const nameCell = document.createElement('td');
-                        nameCell.textContent = entry.User.name;
-                        row.appendChild(nameCell);
-    
-                        const statusCell = document.createElement('td');
-                        statusCell.textContent = entry.status;
-                        row.appendChild(statusCell);
-    
-                        table.appendChild(row);
-                    });
+    const row = document.createElement('tr');
+
+    const nameCell = document.createElement('td');
+    nameCell.textContent = entry.User.name;
+    row.appendChild(nameCell);
+
+    const statusCell = document.createElement('td');
+    if (entry.status === 'Present') {
+        statusCell.innerHTML = '<span style="color: green;">✔</span> Present'; // Green tick
+    } else if (entry.status === 'Absent') {
+        statusCell.innerHTML = '<span style="color: red;">✘</span> Absent'; // Red cross
+    } else {
+        statusCell.textContent = entry.status; // Default text for other statuses
+    }
+    row.appendChild(statusCell);
+
+    table.appendChild(row);
+});
+
     
                     // Append the table to the container
                     container.appendChild(table);
@@ -186,6 +195,16 @@
                     console.error('Error submitting attendance:', error);
                 });
         });
+
+        document.getElementById('fetchReport').addEventListener('click',()=>{
+            console.log("LALA");
+
+            axios.get("http://localhost:3000/fetchAttendanceReport").then((report)=>{
+                console.log(report);
+            }).catch(err=>{
+                console.log(err);
+            })
+        })
     </script>
     
 </body>

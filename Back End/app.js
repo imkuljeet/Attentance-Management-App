@@ -71,6 +71,20 @@ app.get('/getAttendence/:date',(req,res)=>{
   })
 })
 
+app.get('/fetchAttendanceReport',(req,res)=>{
+  Attendance.findAll({
+    attributes: ['date', 'status'], // Only fetch 'date' and 'status' from Attendance
+    include: [{
+      model: User,
+      attributes: ['name'] // Only fetch 'name' from User
+    }]
+  }).then((users)=>{
+    res.status(200).json(users);
+  }).catch((err)=>{
+    console.log(err);
+  })
+
+})
 
 sequelize
   .sync()
