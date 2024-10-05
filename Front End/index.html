@@ -37,6 +37,8 @@
         <button type="submit">Submit Attendance</button>
     </form>
 
+    <div id="attendance-container"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
 
     <script>
@@ -44,11 +46,84 @@
 
         // Listen for the date form submission
         document.getElementById('SearchByDate').addEventListener('submit', function(event) {
-            event.preventDefault();
-            selectedDate = document.getElementById('dateshown').value;
+    event.preventDefault();
+    
+    const selectedDate = document.getElementById('dateshown').value;
+
+    axios.get(`http://localhost:3000/getAttendence/${selectedDate}`)
+    .then((result) => {
+        console.log("List for date >>>", result);
+
+        const attendanceData = result.data;
+        const container = document.getElementById('attendance-container');
+
+        // Clear the container element
+        container.innerHTML = '';
+
+        // Create a table element
+        const table = document.createElement('table');
+
+        // Create a table header row
+        const headerRow = document.createElement('tr');
+
+        // Create and append the header cells
+        const nameHeader = document.createElement('th');
+        nameHeader.textContent = 'Name';
+        headerRow.appendChild(nameHeader);
+
+        const statusHeader = document.createElement('th');
+        statusHeader.textContent = 'Status';
+        headerRow.appendChild(statusHeader);
+
+        // Append the header row to the table
+        table.appendChild(headerRow);
+
+        // Check if attendanceData is empty
+        if (attendanceData.length === 0) {
             document.getElementById('StudentAttendanceForm').style.display = 'block';
-            populateStudentList();
-        });
+            populateStudentList(); // Assuming this function exists
+        } else {
+            // Iterate over the attendance data and create table rows for each entry
+            attendanceData.forEach(entry => {
+                const row = document.createElement('tr');
+
+                const nameCell = document.createElement('td');
+                nameCell.textContent = entry.User.name;
+                row.appendChild(nameCell);
+
+                const statusCell = document.createElement('td');
+                statusCell.textContent = entry.status;
+                row.appendChild(statusCell);
+
+                table.appendChild(row);
+            });
+
+            // Append the table to the container
+            container.appendChild(table);
+        }
+
+        // Add some CSS to style the table without borders
+        const style = document.createElement('style');
+        style.textContent = `
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        `;
+        document.head.appendChild(style);
+    })
+    .catch((err) => {
+        console.log(err);
+        alert('Error fetching attendance data. Please try again.');
+    });
+});
 
         // Populate student list
         function populateStudentList() {
@@ -71,6 +146,8 @@
         // Listen for the attendance form submission
         document.getElementById('StudentAttendanceForm').addEventListener('submit', function(event) {
             event.preventDefault();
+
+            const selectedDate = document.getElementById('dateshown').value;
 
             const attendanceData = [];
             const students = ['Siva', 'Rajesh', 'Ashok','Sai']; // Replace with actual student names
@@ -98,6 +175,9 @@
                     console.error('Error submitting attendance:', error);
                 });
         });
+
+ 
+
     </script>
 </body>
 </html>

@@ -50,6 +50,27 @@ app.use("/markAttendance", async (req, res) => {
   }
 });
 
+app.get('/getAttendence/:date',(req,res)=>{
+  console.log("DATE IS>>",req.params.date);
+  let dates = req.params.date;
+
+  Attendance.findAll({
+    where: { date: dates },
+    include: [{
+      model: User,
+      attributes: ['name'], // Assuming 'name' is the column in the User table
+      required: true
+    }],
+    attributes: ['date', 'status'] // Attributes from Attendance table
+  }).then((result)=>{
+    console.log("PARTICUlar is>>>",result);
+    res.status(200).json(result);
+  }).catch((err)=>{
+    console.log(err);
+    res.status(500).json({err: err});
+  })
+})
+
 
 sequelize
   .sync()

@@ -9,7 +9,7 @@ const Attendance = sequelize.define("attendance", {
     allowNull : false
   },
   date: {
-    type: Sequelize.DATE,
+    type: Sequelize.DATEONLY,
     allowNull: false
   },
   status : {
