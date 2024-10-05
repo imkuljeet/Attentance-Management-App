@@ -80,6 +80,8 @@ app.get('/fetchAttendanceReport',(req,res)=>{
     }]
   }).then((users)=>{
     res.status(200).json(users);
+
+    
   }).catch((err)=>{
     console.log(err);
   })

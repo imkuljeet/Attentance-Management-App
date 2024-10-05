@@ -27,9 +27,10 @@
         <label for="dateshown">Select a Date: </label>
         <input type="date" id="dateshown" name="dateshown" required>
         <button type="submit">Search</button>
-        <button id="fetchReport">Fetch Attendance Report</button>
     </form>
-
+    <br>
+    <button id="fetchReport">Fetch Attendance Report</button>
+    <br>
     
     <form id="StudentAttendanceForm" class="student-form">
         <h4>Mark Attendance</h4>
@@ -196,15 +197,113 @@
                 });
         });
 
-        document.getElementById('fetchReport').addEventListener('click',()=>{
-            console.log("LALA");
+        document.getElementById('fetchReport').addEventListener('click', () => {
+    axios.get("http://localhost:3000/fetchAttendanceReport")
+    .then((report) => {
+        document.getElementById('attendance-container').innerHTML = '';
 
-            axios.get("http://localhost:3000/fetchAttendanceReport").then((report)=>{
-                console.log(report);
-            }).catch(err=>{
-                console.log(err);
-            })
-        })
+        const reportData = report.data; // Assuming this is an array of attendance objects
+        
+        // Create an object to store attendance counts per student
+        const attendanceSummary = {};
+
+        // Process the report data
+        reportData.forEach(entry => {
+            const studentName = entry.User.name;
+            const status = entry.status;
+
+            // Initialize the student data if not already present
+            if (!attendanceSummary[studentName]) {
+                attendanceSummary[studentName] = {
+                    presentDays: 0,
+                    totalDays: 0
+                };
+            }
+
+            // Increment total days
+            attendanceSummary[studentName].totalDays += 1;
+
+            // Increment present days if status is 'Present'
+            if (status === 'Present') {
+                attendanceSummary[studentName].presentDays += 1;
+            }
+        });
+
+        // Clear the container element
+        const container = document.getElementById('attendance-container');
+        container.innerHTML = '';
+
+        // Create a table element
+        const table = document.createElement('table');
+
+        // Create a table header row
+        const headerRow = document.createElement('tr');
+
+        // Create and append the header cells
+        const nameHeader = document.createElement('th');
+        nameHeader.textContent = 'Name';
+        headerRow.appendChild(nameHeader);
+
+        const attendanceHeader = document.createElement('th');
+        attendanceHeader.textContent = 'Attendance (Present/Total Days)';
+        headerRow.appendChild(attendanceHeader);
+
+        const percentageHeader = document.createElement('th');
+        percentageHeader.textContent = 'Attendance %';
+        headerRow.appendChild(percentageHeader);
+
+        // Append the header row to the table
+        table.appendChild(headerRow);
+
+        // Iterate over the attendanceSummary object to populate the table
+        for (const [name, attendance] of Object.entries(attendanceSummary)) {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('td');
+            nameCell.textContent = name;
+            row.appendChild(nameCell);
+
+            const attendanceCell = document.createElement('td');
+            attendanceCell.textContent = `${attendance.presentDays}/${attendance.totalDays}`;
+            row.appendChild(attendanceCell);
+
+            // Calculate the attendance percentage
+            const percentage = ((attendance.presentDays / attendance.totalDays) * 100).toFixed(2);
+
+            const percentageCell = document.createElement('td');
+            percentageCell.textContent = `${percentage}%`;
+            row.appendChild(percentageCell);
+
+            table.appendChild(row);
+        }
+
+        // Append the table to the container
+        container.appendChild(table);
+
+        // Add some CSS to style the table without borders
+        const style = document.createElement('style');
+        style.textContent = `
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        `;
+        document.head.appendChild(style);
+    })
+    .catch(err => {
+        console.log(err);
+        alert('Error fetching attendance report. Please try again.');
+    });
+});
+
+
     </script>
     
 </body>
