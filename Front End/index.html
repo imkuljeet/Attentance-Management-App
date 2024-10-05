@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management App</title>
+    <style>
+        .student-form {
+            display: none;
+        }
+        .student-div {
+            margin-bottom: 10px;
+        }
+        .student-div label {
+            display: inline-block;
+            width: 100px; /* Adjust the width for proper spacing */
+            text-align: left;
+        }
+        .student-div input {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Student Attendance Management App</h3>
+    <form id="SearchByDate">
+        <label for="dateshown">Select a Date: </label>
+        <input type="date" id="dateshown" name="dateshown" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <form id="StudentAttendanceForm" class="student-form">
+        <h4>Mark Attendance</h4>
+        <div id="studentList">
+            <!-- Student list will be populated here -->
+        </div>
+        <button type="submit">Submit Attendance</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+
+    <script>
+        let selectedDate = '';
+
+        // Listen for the date form submission
+        document.getElementById('SearchByDate').addEventListener('submit', function(event) {
+            event.preventDefault();
+            selectedDate = document.getElementById('dateshown').value;
+            document.getElementById('StudentAttendanceForm').style.display = 'block';
+            populateStudentList();
+        });
+
+        // Populate student list
+        function populateStudentList() {
+            const students = ['Siva', 'Rajesh', 'Ashok','Sai']; // Replace with actual student names
+            const studentListDiv = document.getElementById('studentList');
+            studentListDiv.innerHTML = '';
+
+            students.forEach(student => {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'student-div';
+                studentDiv.innerHTML = `
+                    <label>${student}</label>
+                    <input type="radio" name="${student}" value="Present" required> Present
+                    <input type="radio" name="${student}" value="Absent" required> Absent
+                `;
+                studentListDiv.appendChild(studentDiv);
+            });
+        }
+
+        // Listen for the attendance form submission
+        document.getElementById('StudentAttendanceForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const attendanceData = [];
+            const students = ['Siva', 'Rajesh', 'Ashok','Sai']; // Replace with actual student names
+
+            students.forEach(student => {
+                const attendance = document.querySelector(`input[name="${student}"]:checked`).value;
+                attendanceData.push({
+                    student: student,
+                    status: attendance
+                });
+            });
+
+            // Prepare the payload
+            const payload = {
+                date: selectedDate,
+                attendance: attendanceData
+            };
+
+            // Send data to the backend using axios
+            axios.post('http://localhost:3000/markAttendance', payload)
+                .then(response => {
+                    alert('Attendance submitted successfully');
+                })
+                .catch(error => {
+                    console.error('Error submitting attendance:', error);
+                });
+        });
+    </script>
+</body>
+</html>
